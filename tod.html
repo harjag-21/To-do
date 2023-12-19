@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>To-dos list</title>
+  <link rel="stylesheet" href="todo.css">
+  <link rel="stylesheet" href="	https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
+      <script src=
+"https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.0/jquery.min.js">
+    </script>
+      <style>
+        *{
+            font-family:system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+
+        }
+        h1{
+            text-align: center;
+        }
+        h3{
+            position: relative;
+            left: 15vw;
+            top: 7vh;
+        }
+        .form-group{
+            display: flex;
+            flex-direction: column;
+            width: 40vw;
+            margin-left: 10vw;
+            margin-top: 5vh;
+        }
+        .c1{
+            margin-left: 6vw;
+            margin-top: 2vh;
+        }
+        .btns{
+            position: relative;
+            top: 4vh;
+            left: 10vw;
+        }
+        
+        #todoTable{
+            width: 80vw;
+            margin-left: 10vw;
+            border-top: 1px solid rgb(128,128,128,0.6);
+            margin-top: 10vh;
+            border-bottom: 1px solid rgb(128,128,128,0.6);
+        }
+        tr{
+            height: 40px;
+            border-top: 1px solid rgb(128,128,128,0.6);
+        }
+        body{
+            background-color: white;
+  color: black;
+        }
+        .dark{
+            background-color: #222;
+            color: #e6e6e6;
+            
+        }
+
+      </style>
+</head>
+<body>
+    <div class="mode">
+        Dark mode:             
+        <button class="change">Off</button>
+  
+    <h1>My To-dos List</h1>
+
+  <div class="form-group">
+    <label for="title">Title</label>
+    <input type="text" placeholder="Enter new to-do">
+  <small id="emailHelp" class="form-text text-muted">Add an item to the list</small>
+  </div>
+
+  <div class="form-group">
+    <label for="description">Description</label>
+    <input type="text" placeholder="Enter description">
+  </div>
+ <div class="form-group">
+    <label for="deadline">Deadline </label>
+    <input type="datetime-local" >
+    <small id="dead" class="form-text text-muted">You can add deadline for the above task here</small>
+ </div>
+  <div class="c1">
+    <input type="text" placeholder="Enter category" list="categoryList" class="c1">
+  </div>
+  <datalist id="categoryList">
+    <option value="Personal"></option>
+    <option value="Work"></option>
+    <option value="Shopping"></option>
+    <option value="Other"></option>
+  </datalist>
+ <div class="btns">
+    <button   id="addBtn" class="btn btn-primary">Add to list</button>
+    <button  id="clear" class="btn btn-primary" onclick="clearStorage()">Clear list</button>
+ </div>
+  <ul></ul>
+  <h3>Your Tasks</h3>
+  <table id="todoTable">
+    <tr>
+      <td><b>Checkbox</b></td>
+      <td><b>To-do</b></td>
+      <td><b>Description</b></td>
+      <td><b>Deadline</b></td>
+      <td>
+        <select id="categoryFilter">
+            <option value="Personal">Personal</option>
+            <option value="Work">Work</option>
+            <option value="Shopping">Shopping</option>
+            <option value="Other">Other</option>
+        </select>
+      </td>
+      <td>
+        <select  id="categoryFilter">
+            <option value="High">High</option>
+            <option value="Medium">Medium</option>
+            <option value="Low">Low</option>
+        </select>
+      </td>
+      <td><b>Actions</b></td>
+      
+    </tr>
+  </table>
+  <script >
+
+    function clearStorage(){
+            if (confirm("Do you areally want to clear?")){
+            console.log('Clearing the storage')
+            localStorage.clear();
+            update()
+            }
+        }
+    onload = todoMain;
+
+function todoMain(){
+  let inputElem,
+      inputElem2,
+      inputElem3,
+      inputElem4,
+      button,
+      selectElem,
+      todoList=[],
+      ulElem;
+
+  getElements();
+  addListeners();
+  load();
+  renderRows();
+
+  function getElements(){
+    inputElem = document.getElementsByTagName("input")[0];
+    inputElem2 = document.getElementsByTagName("input")[1];
+    inputElem3 = document.getElementsByTagName("input")[2];
+    inputElem4 = document.getElementsByTagName("input")[3];
+    button = document.getElementById("addBtn");
+    selectElem=document.getElementById("categoryFilter");
+    ulElem = document.getElementsByTagName("ul")[0];
+  }
+
+  function addListeners(){
+    button.addEventListener("click", addEntry, false);
+    selectElem.addEventListener("change",filterEntries,false);
+  }
+
+  function addEntry(event){
+
+    let inputValue = inputElem.value;
+    inputElem.value = "";
+
+    let inputValue2 = inputElem2.value;
+    inputElem2.value = "";
+    
+    let inputValue3 = inputElem3.value;
+    inputElem3.value = "";
+
+    let inputValue4 = inputElem4.value;
+    inputElem4.value = "";
+
+    todoList.push(inputValue,inputValue2,inputValue3,inputValue4)
+    save();
+    renderRow(inputValue,inputValue2,inputValue3,inputValue4);
+
+
+    
+
+  }
+  function filterEntries(){
+    let rows= document.getElementsByTagName("tr")
+
+    for(let i=1;i<rows.length;i++){
+        let category=rows[i].getElementsByTagName("td")[4].innerText;
+        if(category==selectElem.value)
+        {
+            rows[i].style.display="";
+        }
+        else{
+            rows[i].style.display="none";
+        }
+    }
+  }
+  function save(){
+    let stringified=JSON.stringify(todoList);
+    localStorage.setItem("todoList", stringified);
+  }
+
+  function load(){
+   let retrieved= localStorage.getItem("todoList");
+   todoList=JSON.parse(retrieved);
+    if(todoList==null)
+    todoList=[];
+  }
+
+  function renderRows(){
+    todoList.forEach(todo=> {
+        renderRow(todo,null,null,null);
+    })
+  }
+  function renderRow(inputValue,inputValue2,inputValue3,inputValue4){
+    let table = document.getElementById("todoTable");
+
+let trElem = document.createElement("tr");
+table.appendChild(trElem);
+
+// checkbox cell
+let checkboxElem = document.createElement("input");
+checkboxElem.type = "checkbox";
+checkboxElem.addEventListener("click", done, false);
+let tdElem1 = document.createElement("td");
+tdElem1.appendChild(checkboxElem);
+trElem.appendChild(tdElem1);
+
+// to-do cell
+let tdElem2 = document.createElement("td");
+tdElem2.innerText = inputValue;
+trElem.appendChild(tdElem2);
+
+let tdElem3 = document.createElement("td");
+tdElem3.innerText = inputValue2;
+trElem.appendChild(tdElem3);
+
+// category cell
+let tdElem4 = document.createElement("td");
+tdElem4.innerText = inputValue3;
+trElem.appendChild(tdElem4);
+
+let tdElem5 = document.createElement("td");
+tdElem5.innerText = inputValue4;
+trElem.appendChild(tdElem5);
+
+// delete cell
+let spanElem = document.createElement("span");
+spanElem.innerText = "delete";
+spanElem.className = "material-icons";
+spanElem.addEventListener("click", deleteItem, false);
+let tdElem6 = document.createElement("td");
+tdElem6.appendChild(spanElem);
+trElem.appendChild(tdElem6);
+
+let spanElem2 = document.createElement("span");
+spanElem2.innerText = "edit";
+spanElem2.className = "material-icons";
+spanElem2.addEventListener("click", editdata, false);
+let tdElem7 = document.createElement("td");
+tdElem7.appendChild(spanElem2);
+trElem.appendChild(tdElem7);
+
+function editdata(spanElem2){
+    let row=spanElem2.parentNode;
+    let todocell=row.cells[1];
+    let descell=row.cells[2];
+    
+
+    let todoInput = 
+         prompt("Enter the updated name:", 
+                    todocell.innerHTML); 
+    let desInput = 
+         prompt("Enter the updated email:", 
+                    descell.innerHTML); 
+    let deadInput = 
+        prompt("Enter the updated mobile details:", 
+                    deadcell.innerHTML 
+                ); 
+
+                todocell.innerHTML = todoInput; 
+            descell.innerHTML = desInput; 
+            deadcell.innerHTML = deadInput; 
+            
+            
+    
+
+}
+
+
+
+function deleteItem(){
+      trElem.remove();
+    }
+
+    function done(){
+      trElem.classList.toggle("strike");      
+    }
+
+  }
+
+  function myFunction() {
+  var element = document.body;
+  element.classList.toggle("dark-mode");
+}
+}
+
+$( ".change" ).on("click", function() {
+            if( $( "body" ).hasClass( "dark" )) {
+                $( "body" ).removeClass( "dark" );
+                $( ".change" ).text( "OFF" );
+            } else {
+                $( "body" ).addClass( "dark" );
+                $( ".change" ).text( "ON" );
+            }
+        });
+    
+  </script>
+</body>
+</html>
